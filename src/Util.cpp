@@ -1,3 +1,4 @@
+#include <vector>
 #include "Util.h"
 
 unsigned int CompileShader(unsigned int type, const std::string& source)
@@ -65,4 +66,31 @@ unsigned int CreateShader(const std::string& vertexShader, const std::string& fr
 	glDeleteShader(fs);
 
 	return program;
+}
+
+
+int indexOfNumberLetter(std::string& str, int offset) {
+	for (int i = offset; i < int(str.length()); ++i) {
+		if ((str[i] >= '0' && str[i] <= '9') || str[i] == '-' || str[i] == '.') return i;
+	}
+	return (int)str.length();
+}
+
+int lastIndexOfNumberLetter(std::string& str) {
+	for (int i = int(str.length()) - 1; i >= 0; --i) {
+		if ((str[i] >= '0' && str[i] <= '9') || str[i] == '-' || str[i] == '.') return i;
+	}
+	return 0;
+}
+
+std::vector<std::string> split(const std::string& s, char delim) {
+	std::vector<std::string> elems;
+
+	std::stringstream ss(s);
+	std::string item;
+	while (getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+
+	return elems;
 }

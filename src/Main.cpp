@@ -18,7 +18,7 @@ void idle();
 
 void printInstruction()
 {
-	std::cout << "Press ESC to switch on/off moving mode.";
+	std::cout << "----------------------------------------\nPress ESC to switch on/off moving mode.\n----------------------------------------";
 }
 
 int main(int argc, char** argv)

@@ -5,10 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include "Cube.h"
-
-int indexOfNumberLetter(std::string& str, int offset);
-int lastIndexOfNumberLetter(std::string& str);
-std::vector<std::string> split(const std::string& s, char delim);
+#include "Util.h"
 
 Cube::Cube()
 {
@@ -17,11 +14,15 @@ Cube::Cube()
 	vcount = 0;
 
 	loadMesh("models/cube.obj");
-	loadTexture("textures/cube1.jpg");
+	loadTexture("textures/cube.jpg");
 }
 
 Cube::~Cube()
 {
+	vertices.clear();
+	if (vao) { glDeleteVertexArrays(1, &vao); vao = 0; }
+	if (vbuf) { glDeleteBuffers(1, &vbuf); vbuf = 0; }
+	vcount = 0;
 }
 
 void Cube::loadMesh(std::string filename)
@@ -170,30 +171,4 @@ void Cube::draw()
 	glDrawArrays(GL_TRIANGLES, 0, vcount);
 	glBindVertexArray(0);
 	//glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-int indexOfNumberLetter(std::string& str, int offset) {
-	for (int i = offset; i < int(str.length()); ++i) {
-		if ((str[i] >= '0' && str[i] <= '9') || str[i] == '-' || str[i] == '.') return i;
-	}
-	return (int)str.length();
-}
-
-int lastIndexOfNumberLetter(std::string& str) {
-	for (int i = int(str.length()) - 1; i >= 0; --i) {
-		if ((str[i] >= '0' && str[i] <= '9') || str[i] == '-' || str[i] == '.') return i;
-	}
-	return 0;
-}
-
-std::vector<std::string> split(const std::string& s, char delim) {
-	std::vector<std::string> elems;
-
-	std::stringstream ss(s);
-	std::string item;
-	while (getline(ss, item, delim)) {
-		elems.push_back(item);
-	}
-
-	return elems;
 }

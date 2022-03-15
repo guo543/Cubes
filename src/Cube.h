@@ -35,4 +35,8 @@ public:
 	{
 		return modelMat;
 	}
+	void setModelMat(glm::mat4 modelMat)
+	{
+		this->modelMat = modelMat;
+	}
 };

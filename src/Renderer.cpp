@@ -1,5 +1,7 @@
 #include <GL/glew.h>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Renderer.h"
@@ -21,7 +23,8 @@ Renderer::Renderer()
 	camPos = glm::vec3(0.0f, 2.0f, 10.0f);
 	lookDir = glm::vec3(0.0f, 0.0f, -1.0f);
 	updateProjView();
-	cube = new Cube();
+	readConfig("config.txt");
+	//cubes.push_back(new Cube());
 
 	lastMouseX = glutGet(GLUT_WINDOW_WIDTH) / 2;
 	lastMouseY = glutGet(GLUT_WINDOW_HEIGHT) / 2;
@@ -33,7 +36,30 @@ Renderer::Renderer()
 Renderer::~Renderer()
 {
 	if (shader)	glDeleteProgram(shader);
-	delete cube;
+	cubes.clear();
+}
+
+void Renderer::readConfig(std::string filename)
+{
+	std::ifstream file(filename);
+	if (!file.is_open()) {
+		std::stringstream ss;
+		ss << "Error reading " << filename << ": failed to open file";
+		throw std::runtime_error(ss.str());
+	}
+
+	std::string line;
+	while (getline(file, line)) {
+		Cube* cube = new Cube();
+
+		std::vector<std::string> offsets = split(line, ' ');
+
+		glm::vec3 trans = glm::vec3(std::stof(offsets[0]), std::stof(offsets[1]), std::stof(offsets[2]));
+
+		cube->setModelMat(glm::translate(glm::mat4(1.0f), trans));
+
+		cubes.push_back(cube);
+	}
 }
 
 void Renderer::render()
@@ -44,16 +70,19 @@ void Renderer::render()
 	// Set shader to draw with
 	glUseProgram(shader);
 
-	glm::mat4 xform(1.0f);
+	for (size_t i = 0; i < cubes.size(); i++)
+	{
+		glm::mat4 xform(1.0f);
 
-	//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, -10.0f));
-	xform = proj * view * cube->getModelMat();
+		//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, -10.0f));
+		xform = proj * view * cubes[i]->getModelMat();
 
-	cube->activateTexture();
-	glUniformMatrix4fv(xformLoc, 1, GL_FALSE, glm::value_ptr(xform));
-	glUniform1i(texUnitLoc, 0);
+		cubes[i]->activateTexture();
+		glUniformMatrix4fv(xformLoc, 1, GL_FALSE, glm::value_ptr(xform));
+		glUniform1i(texUnitLoc, 0);
 
-	cube->draw();
+		cubes[i]->draw();
+	}
 
 	glUseProgram(0);
 }

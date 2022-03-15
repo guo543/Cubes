@@ -23,7 +23,7 @@ private:
 	glm::vec3 velocity;
 	bool cameraMoving;
 
-	Cube* cube;
+	std::vector<Cube*> cubes;
 
 	int lastMouseX;
 	int lastMouseY;
@@ -31,6 +31,8 @@ private:
 public:
 	Renderer();
 	~Renderer();
+
+	void readConfig(std::string filename);
 
 	void render();
 	void updateProjView();
