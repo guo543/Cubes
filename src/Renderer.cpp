@@ -16,6 +16,7 @@ Renderer::Renderer()
 
 	shader = CreateShader("shaders/v.glsl", "shaders/f.glsl");
 	xformLoc = glGetUniformLocation(shader, "xform");
+	texUnitLoc = glGetUniformLocation(shader, "cubeTex");
 
 	camPos = glm::vec3(0.0f, 2.0f, 10.0f);
 	lookDir = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -48,7 +49,9 @@ void Renderer::render()
 	//glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -2.0f, -10.0f));
 	xform = proj * view * cube->getModelMat();
 
+	cube->activateTexture();
 	glUniformMatrix4fv(xformLoc, 1, GL_FALSE, glm::value_ptr(xform));
+	glUniform1i(texUnitLoc, 0);
 
 	cube->draw();
 
