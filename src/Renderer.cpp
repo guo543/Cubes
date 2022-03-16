@@ -7,6 +7,8 @@
 #include "Renderer.h"
 #include "Util.h"
 
+bool intersect(const glm::vec3& camPos, const glm::vec3& lookDir, const glm::vec3& minBB, const glm::vec3& maxBB);
+
 Renderer::Renderer()
 {
 	//std::cout << "Renderer Created" << std::endl;
@@ -18,6 +20,7 @@ Renderer::Renderer()
 
 	shader = CreateShader("shaders/v.glsl", "shaders/f.glsl");
 	xformLoc = glGetUniformLocation(shader, "xform");
+	highlightedLoc = glGetUniformLocation(shader, "highlighted");
 	texUnitLoc = glGetUniformLocation(shader, "cubeTex");
 
 	camPos = glm::vec3(0.0f, 2.0f, 10.0f);
@@ -57,6 +60,11 @@ void Renderer::readConfig(std::string filename)
 		glm::vec3 trans = glm::vec3(std::stof(offsets[0]), std::stof(offsets[1]), std::stof(offsets[2]));
 
 		cube->setModelMat(glm::translate(glm::mat4(1.0f), trans));
+		cube->setMinBB(cube->getMinBB() + trans);
+		cube->setMaxBB(cube->getMaxBB() + trans);
+
+		//std::cout << cube->getMinBB()[0] << cube->getMinBB()[1] << cube->getMinBB()[2] << "\n";
+		//std::cout << cube->getMaxBB()[0] << cube->getMaxBB()[1] << cube->getMaxBB()[2] << "\n";
 
 		cubes.push_back(cube);
 	}
@@ -80,11 +88,61 @@ void Renderer::render()
 		cubes[i]->activateTexture();
 		glUniformMatrix4fv(xformLoc, 1, GL_FALSE, glm::value_ptr(xform));
 		glUniform1i(texUnitLoc, 0);
-
+		if (intersect(camPos, lookDir, cubes[i]->getMinBB(), cubes[i]->getMaxBB())) {
+			glUniform1i(highlightedLoc, 1);
+		}
+		else {
+			glUniform1i(highlightedLoc, 0);
+		}
+		
 		cubes[i]->draw();
 	}
 
 	glUseProgram(0);
+}
+
+void swap(float* a, float* b) {
+	float tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+bool intersect(const glm::vec3& camPos, const glm::vec3& lookDir, const glm::vec3& minBB, const glm::vec3& maxBB)
+{
+	float tmin = (minBB.x - camPos.x) / lookDir.x;
+	float tmax = (maxBB.x - camPos.x) / lookDir.x;
+
+	if (tmin > tmax) swap(&tmin, &tmax);
+
+	float tymin = (minBB.y - camPos.y) / lookDir.y;
+	float tymax = (maxBB.y - camPos.y) / lookDir.y;
+
+	if (tymin > tymax) swap(&tymin, &tymax);
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (minBB.z - camPos.z) / lookDir.z;
+	float tzmax = (maxBB.z - camPos.z) / lookDir.z;
+
+	if (tzmin > tzmax) swap(&tzmin, &tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	return true;
 }
 
 void Renderer::updateProjView()
@@ -128,7 +186,7 @@ void Renderer::addVelocity(Direction dir)
 		velocity[2] += tmpLookDir[2];
 		break;
 	}
-	velocity = glm::normalize(velocity) * 0.05f;
+	velocity = glm::normalize(velocity) * 0.07f;
 	updateProjView();
 }
 

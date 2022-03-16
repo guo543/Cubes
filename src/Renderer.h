@@ -14,6 +14,7 @@ private:
 
 	int shader;
 	unsigned int xformLoc;
+	unsigned int highlightedLoc;
 	unsigned int texUnitLoc;
 
 	glm::vec3 lookDir;

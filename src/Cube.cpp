@@ -9,6 +9,9 @@
 
 Cube::Cube()
 {
+	minBB = glm::vec3(std::numeric_limits<float>::max());
+	maxBB = glm::vec3(std::numeric_limits<float>::lowest());
+
 	vao = 0;
 	vbuf = 0;
 	vcount = 0;
@@ -48,6 +51,12 @@ void Cube::loadMesh(std::string filename)
 			std::vector<std::string> values = split(line.substr(index1, index2 - index1 + 1), ' ');
 			glm::vec3 vert(stof(values[0]), stof(values[1]), stof(values[2]));
 			raw_vertices.push_back(vert);
+
+			// Update bounding box
+			minBB = glm::min(minBB, vert);
+			maxBB = glm::max(maxBB, vert);
+			//std::cout << minBB[0] << minBB[1] << minBB[2] << "\n";
+			//std::cout << maxBB[0] << maxBB[1] << maxBB[2] << "\n";
 		}
 		else if (line.substr(0, 2) == "vt") {
 			// Read texture coorindates

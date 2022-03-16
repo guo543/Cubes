@@ -1,2 +1,2 @@
 # Cubes
-A world of cubes created with OpenGL and freeglut.
+A world of cubes created in C++ with OpenGL and freeglut.

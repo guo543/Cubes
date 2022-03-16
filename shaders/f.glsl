@@ -6,6 +6,7 @@ smooth in vec2 fragUV;
 out vec3 outCol;	// Final pixel color
 
 uniform sampler2D cubeTex;
+uniform int highlighted;
 
 void main() {
 	// Visualize normals as colors
@@ -18,5 +19,9 @@ void main() {
 
 	//float diffuse = max(dot(light, norm), 0.0);
 	//outCol = (ambient + diffuse) * vec3(0.0, 1.0, 1.0);
-	outCol = texture(cubeTex, fragUV).xyz;
+	if (highlighted == 1) {
+		outCol = texture(cubeTex, fragUV).xyz + vec3(0.3);
+	} else {
+		outCol = texture(cubeTex, fragUV).xyz;
+	}
 }
